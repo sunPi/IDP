@@ -49,10 +49,12 @@ transpose.result <- function(decon.res.merged){
   decon.res.merged <- decon.res.merged[-1, ]
   decon.res.merged <- as.data.frame(decon.res.merged)
   decon.res.merged <- tibble::rownames_to_column(decon.res.merged, "SampleID")
+  decon.res.merged <- decon.res.merged[,order(colnames(decon.res.merged))]
   
   return(decon.res.merged)
   
 }
+
 #---- Header ----
 # Please make sure there are no gene duplicates in your dataset !!!!!!!
 "Immune Deconvolution Pipeline - Deconvolutes TPM-normalized RNA-seq data by 
@@ -155,6 +157,7 @@ message("Serializing the results into ", here(outfolder), "...")
 writexl::write_xlsx(decon.res, here(outfolder, "decon_methods.xlsx"))
 write.csv(decon.res.merged, here(outfolder,"decon_all.csv"), row.names = FALSE)
 message("IDP Finished Successfully!")
+
 
 # id <- decon.res.merged$SampleID
 # values <- decon.res.merged[,-1]
