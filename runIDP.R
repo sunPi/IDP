@@ -40,7 +40,19 @@ run_deconvolution <- function(method, gene_expression_matrix, indications = NULL
   
   return(result)
 }
-
+# Function to transform results data frame
+transpose.result <- function(decon.res.merged){
+  cnames <- paste0(decon.res.merged$Method,"_",decon.res.merged$cell_type)
+  decon.res.merged <- dplyr::select(decon.res.merged, -Method)
+  decon.res.merged <- t(decon.res.merged)
+  colnames(decon.res.merged) <- cnames
+  decon.res.merged <- decon.res.merged[-1, ]
+  decon.res.merged <- as.data.frame(decon.res.merged)
+  decon.res.merged <- tibble::rownames_to_column(decon.res.merged, "SampleID")
+  
+  return(decon.res.merged)
+  
+}
 #---- Header ----
 # Please make sure there are no gene duplicates in your dataset !!!!!!!
 "Immune Deconvolution Pipeline - Deconvolutes TPM-normalized RNA-seq data by 
@@ -136,6 +148,7 @@ for (method in methods) {
 
 # Merge datasets"
 decon.res.merged <- Reduce(function(x, y) merge(x, y, all = TRUE), decon.res)
+decon.res.merged <- transpose.result(decon.res.merged)
 
 # Serialize results
 message("Serializing the results into ", here(outfolder), "...")
@@ -143,4 +156,6 @@ writexl::write_xlsx(decon.res, here(outfolder, "decon_methods.xlsx"))
 write.csv(decon.res.merged, here(outfolder,"decon_all.csv"), row.names = FALSE)
 message("IDP Finished Successfully!")
 
-
+# id <- decon.res.merged$SampleID
+# values <- decon.res.merged[,-1]
+# apply(values, 2, as.numeric)
